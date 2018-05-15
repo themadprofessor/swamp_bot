@@ -12,6 +12,7 @@ use serenity::client::bridge::voice::ClientVoiceManager;
 use serenity::model::gateway::Ready;
 use serenity::model::id::GuildId;
 use serenity::model::voice::VoiceState;
+use serenity::model::channel::Message;
 use typemap::Key;
 
 use std::sync::Arc;
@@ -31,6 +32,17 @@ impl Handler {
 }
 
 impl EventHandler for Handler {
+    fn message(&self, ctx: Context, msg: Message) {
+        if msg.content.trim().eq_ignore_ascii_case("ogres have layers") {
+            let manager_lock = ctx.data.lock().get::<VoiceManager>().cloned().unwrap();
+            let mut manager = manager_lock.lock();
+            if let Some(handler) = manager.get_mut(self.conf.guild_id) {
+                handler.stop();
+                println!("Stopped");
+            }
+        }
+    }
+
     fn ready(&self, ctx: Context, ready: Ready) {
         let data_lock = ctx.data.lock();
         let manager_lock = data_lock.get::<VoiceManager>().cloned().unwrap();
@@ -44,6 +56,9 @@ impl EventHandler for Handler {
         let mut manager = manager_lock.lock();
         if let Some(handler) = manager.get_mut(self.conf.guild_id) {
             handler.play(::serenity::voice::ffmpeg(&self.conf.audio_path).unwrap());
+            if let Err(e) = self.conf.text_channel_id.say("ONIONS HAVE LAYERS") {
+                eprintln!("Failed to send playing message! {}", e);
+            }
             println!("Playing");
         }
     }
