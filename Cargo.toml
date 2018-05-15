@@ -5,6 +5,7 @@ authors = ["Stuart <stu@reilly-family.co.uk>"]
 
 [dependencies]
 failure = "0.1"
-serenity = "0.5"
+serenity = {version = "0.5", features = ["voice"]}
 config = "0.8"
 directories = "0.10"
+typemap = "0.3"
